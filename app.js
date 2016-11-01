@@ -6,34 +6,40 @@ const addLocationModal = $('#add-location-modal')
 const addLocationButton = $('#add-location')
 const saveLocationButton = $('button#save-location')
 const locationDescription = $('#modal-location-desc')
-var map
+const openLocationDrawer = $('button#view-location-drawer')
+const openAccountDrawer = $('button#view-account')
+const drawer = $('div#drawer')
 
+var map;
 
 const db = new PouchDB('places-rev');
 
 let state = {
-  currentLocation: null
+  currentLocation: null,
+  drawer: {
+    isOpen: false,
+    view: null
+  },
+  locations: []
 }
 
-function addPlaceFromGeo(locationObj){
-  let { timestamp, coords } = locationObj;
-  let { latitude, longitude } = coords
-  state.currentLocation = { timestamp, latitude, longitude }
-  addLocationModal.classList.toggle('modal-closed')
-}
-
-function errorPlaceFromGeo(){
-  console.log("Beep Boop. Erorrz")
-}
+// add location to map methods
 
 saveLocationButton.addEventListener('click', evt => {
+  evt.stopPropagation()
   let desc = locationDescription.innerHTML
   state.currentLocation.description = desc;
-  db.post(state.currentLocation)
+  let currentLocation = {
+    timestamp: state.currentLocation.timestamp,
+    latitude: state.currentLocation.latitude,
+    longitude: state.currentLocation.longitude,
+    description: state.currentLocation.description
+  }
+  db.post(currentLocation)
     .then( response => {
-      addLocationModal.classList.toggle('modal-closed')
-      addMarkerToMap(state.currentLocation)
-      state.currentLocation = null;
+      state.locations.push(currentLocation)
+      addMarkerToMap(currentLocation)
+      closeModal()      
     })
     .catch( err => {
       console.log("there was an error ...\n", err)
@@ -41,24 +47,56 @@ saveLocationButton.addEventListener('click', evt => {
 })
 
 openModalButton.addEventListener('click', evt => {
-  // evt.stopPropagation()
   navigator.geolocation
-    .getCurrentPosition(addPlaceFromGeo, errorPlaceFromGeo)
+    .getCurrentPosition(openModal, errorPlaceFromGeo)
 }) 
+
+function closeModalWindow(evt){
+  let closest = evt.target.closest('#add-location-modal')
+  if (evt.target === addLocationModal || closest){
+    return
+  } else {
+    closeModal()
+  }
+  // if (evt.target !== addLocationModal && !closest && ){
+  // }
+}
+
+function closeModal(){
+  console.log("closeModal");
+  addLocationModal.classList.toggle('modal-closed')
+  state.currentLocation = null;
+  window.removeEventListener('click', closeModalWindow)
+}
+
+// opens the modal 
+function openModal(locationObj){
+  let { timestamp, coords } = locationObj;
+  let { latitude, longitude } = coords
+  state.currentLocation = { timestamp, latitude, longitude }
+  addLocationModal.classList.toggle('modal-closed')
+  window.addEventListener('click', closeModalWindow)
+}
+
+function errorPlaceFromGeo(){
+  console.log("Beep Boop. Erorrz")
+}
+
+// map methods
 
 function addMarkerToMap(markerObj){
   console.log("markerObj", markerObj);
   L.marker([markerObj.latitude, markerObj.longitude])
     .addTo(map)
     .bindPopup(markerObj.description)
-    .openPopup()
+    // .openPopup()
 }
 
 function startMap(locationObj){
   let { coords } = locationObj;
   let { latitude, longitude } = coords
   map = L.map('leaflet-map-container')
-    .setView([latitude, longitude], 13)
+    .setView([latitude, longitude], 18)
   L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
   }).addTo(map);
@@ -67,6 +105,7 @@ function startMap(locationObj){
     attachements: true
   }).then(results => {
     results.rows.forEach( row => {
+      state.locations.push(row.doc)
       addMarkerToMap(row.doc)
     })
   })
@@ -74,4 +113,86 @@ function startMap(locationObj){
 
 function errorStartMap(){}
 
+// drawer rendering
+
+function checkDrawerIsBuilt(view){
+  console.log("view", view);
+  if (view === state.drawer.view) {
+    return
+  } else {
+    if (view === "account") {
+      console.log("account");
+      state.drawer.view = "account"
+      buildDrawerAccount()
+    } else if (view==="locations") {
+      state.drawer.view = "locations"
+      buildDrawerLocations()
+    } else {
+      state.drawer.view = "locations"
+      buildDrawerLocations()
+    }
+  }
+}
+
+function buildDrawerLocations(){
+  drawer.innerHTML = "Locations View"
+}
+
+function buildDrawerAccount(){
+  drawer.innerHTML = "Account"
+}
+
+// open drawer
+
+openLocationDrawer.addEventListener('click', toggleDrawer.bind(null, 'location'))
+openAccountDrawer.addEventListener('click', toggleDrawer.bind(null, 'account'))
+
+function toggleDrawer(view, event){
+  event.stopPropagation()
+  checkDrawerIsBuilt(view)
+  if (state.drawer.IsOpen){
+    closeDrawer()
+  } else {
+    openDrawer(event)
+  }
+}
+
+function openDrawer(){
+  // open/close drawer and add/remove event listener
+  drawer.classList.toggle('drawer-closed')
+  window.addEventListener('click', checkClickDrawer)
+  state.drawer.isOpen = true;
+}
+
+function closeDrawer(){
+  drawer.classList.toggle('drawer-closed')
+  window.removeEventListener('click', checkClickDrawer)
+  state.drawer.isOpen = false;
+}
+
+function checkClickDrawer(windowEvent) {
+  // did we click anywhere in the drawer
+  let closest = windowEvent.target.closest('#drawer')
+  if (windowEvent.target===drawer || closest) {
+    return 
+  } else {
+    closeDrawer()
+  }
+}
+
+
+// //  open account drawer 
+// openAccountDrawer.addEventLister('click', toggleAccountDrawer)
+
+// function toggleAccountDrawer(event){
+//   event.stopPropagation()
+//   checkDrawerIsBuilt('account')
+//   if (state.drawer.IsOpen){
+//     closeDrawer()
+//   } else {
+//     openDrawer(event)
+//   }
+// }
+
+// kick it off
 navigator.geolocation.getCurrentPosition(startMap, errorStartMap)

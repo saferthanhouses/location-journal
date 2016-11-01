@@ -10,7 +10,23 @@ body {
   display: flex;
   align-items: flex-end;
   justify-content: center;
+  overflow: hidden;
 }
+
+div#drawer {
+  height: 100%;
+  width: 70%;
+  position: fixed;
+  z-index: 30;
+  border: 1px solid silver;
+  background-color: #F0F0F0;
+  transition: transform 0.5s cubic-bezier(0.55, 0.055, 0.675, 0.19);
+}
+
+.drawer-closed {
+  transform: translateX(-101%);
+}
+
 
 #leaflet-map-container {
   position: absolute;
@@ -19,10 +35,27 @@ body {
   z-index:0;
 }
 
+div#bottom-menu {
+  /*background-color: rebeccapurple;*/
+  font-size: 40px;
+  z-index: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  position: relative;
+  bottom: -50px;
+}
+
+.btm-nav-btn {
+  background-color: rebeccapurple;
+  font-size: 20px;
+}
+
 button#add-location {
-  width: 50%;
-  height: 20%;
-  border-radius: 10px;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
   background-color: rebeccapurple;
   font-size: 40px;
   outline: none;
@@ -54,6 +87,7 @@ button#add-location:hover {
   border: 1px solid rebeccapurple;
   z-index:20;
 }
+
 
 .modal-closed {
   transform: translateY(-130%);
