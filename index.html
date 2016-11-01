@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Place Journal</title>
+  <link href="reset.css" rel="stylesheet"/>
+  <link href="style.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
+</head>
+<body>
+  <div id="add-location-modal" class="modal-closed">
+    <div contenteditable="" id="modal-location-desc">
+      This div is contenteditable
+    </div>
+    <button id="save-location">Remember This Place</button>
+  </div>
+    <div id="leaflet-map-container"></div>
+  <div class="container">
+    <button id="add-location">Add Location</button>
+  </div>
+  <script src="//cdn.jsdelivr.net/pouchdb/6.0.7/pouchdb.min.js">
+</script>
+  <script src="app.js"></script>
+</body>
+</html>

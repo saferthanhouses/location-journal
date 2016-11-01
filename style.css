@@ -1,0 +1,86 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: hsla(31,15%,50%,.1);
+}
+
+.container {
+  z-index:-1;
+  width: 100%; 
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+#leaflet-map-container {
+  position: absolute;
+  width:100%;
+  height:100%;
+  z-index:0;
+}
+
+button#add-location {
+  width: 50%;
+  height: 20%;
+  border-radius: 10px;
+  background-color: rebeccapurple;
+  font-size: 40px;
+  outline: none;
+  color: #F0F0F0;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+  transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+  z-index:1;
+}
+
+button#add-location:hover {
+  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+}
+
+#add-location-modal {
+  position: fixed;
+  width: 80%;
+  height: 80%;
+  border-radius: 15px;
+  border: 1px solid silver;
+  left: 10%;
+  top: 10%;
+  background-color: silver;
+  transition: transform 0.35s cubic-bezier(0.550, 0.055, 0.675, 0.190);
+  will-change: transform;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid rebeccapurple;
+  z-index:20;
+}
+
+.modal-closed {
+  transform: translateY(-130%);
+}
+
+div#modal-location-desc {
+  margin-top: 20px;
+  padding: 10px;
+  height: 15%;
+  width: 90%;
+  background-color: #F0F0F0;
+  border-radius: 5px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+  border: 1px solid rebeccapurple;
+}
+
+input#modal-title {
+  width: 90%;
+}
+
+button#save-location {
+  background: linear-gradient(45deg,)
+  width: 30%;
+  height: 10%;
+  margin-bottom: 20px;
+  border-radius: 7px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+  border: 1px solid rebeccapurple;
+}
+
