@@ -39,17 +39,38 @@ div#bottom-menu {
   /*background-color: rebeccapurple;*/
   font-size: 40px;
   z-index: 1;
+  width: 100%;
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   position: relative;
-  bottom: -50px;
+  bottom: -35px;
 }
 
 .btm-nav-btn {
   background-color: rebeccapurple;
   font-size: 20px;
+}
+
+.btn-central {
+  border: 3px solid white;
+}
+
+.btn-side {
+  position: absolute;
+  z-index:1;
+  border-top: 3px solid white;
+  width:36%;
+  height:80px;
+}
+
+button#view-location-drawer {
+  left:0;
+}
+
+button#view-account-drawer {
+  right:0;
 }
 
 button#add-location {
@@ -62,7 +83,7 @@ button#add-location {
   color: #F0F0F0;
   box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
   transition: all 0.3s cubic-bezier(.25,.8,.25,1);
-  z-index:1;
+  z-index:3;
 }
 
 button#add-location:hover {

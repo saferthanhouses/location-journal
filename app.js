@@ -7,7 +7,7 @@ const addLocationButton = $('#add-location')
 const saveLocationButton = $('button#save-location')
 const locationDescription = $('#modal-location-desc')
 const openLocationDrawer = $('button#view-location-drawer')
-const openAccountDrawer = $('button#view-account')
+const openAccountDrawer = $('button#view-account-drawer')
 const drawer = $('div#drawer')
 
 var map;
@@ -15,6 +15,7 @@ var map;
 const db = new PouchDB('places-rev');
 
 let state = {
+  isInteractiveMode: false,
   currentLocation: null,
   drawer: {
     isOpen: false,
@@ -97,9 +98,11 @@ function startMap(locationObj){
   let { latitude, longitude } = coords
   map = L.map('leaflet-map-container')
     .setView([latitude, longitude], 18)
-  L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+  L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/streets-v10/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1Ijoiam9leW9saXZlciIsImEiOiJjaXJwcDViZ2kwZ3NjZmttNjE0azhiZGZnIn0.BVe9J_2_RAf6WO8DwVyNVQ', {
     attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
   }).addTo(map);
+  var userMarker = L.userMarker([latitude, longitude], {pulsing: true, smallIcon:true});
+  userMarker.addTo(map);
   db.allDocs({
     include_docs: true,
     attachements: true
