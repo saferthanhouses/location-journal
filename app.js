@@ -2,45 +2,58 @@ const $ = document.querySelector.bind(document)
 const $$ = document.querySelectorAll.bind(document)
 
 const openModalButton = $('button#add-location')
-const addLocationModal = $('#add-location-modal')
-const addLocationButton = $('#add-location')
+const locationModal = $('#location-modal')
 const saveLocationButton = $('button#save-location')
 const locationDescription = $('#modal-location-desc')
+const locationName = $('#modal-location-name')
+const closeModalButton = $('#modal-header-quit') 
 const openLocationDrawer = $('button#view-location-drawer')
 const openAccountDrawer = $('button#view-account-drawer')
 const drawer = $('div#drawer')
+const accountContainer = $('div#account-container')
+const locationsContainer = $('div#locations-container')
+const locationsListContainer = $('div#locations-list-container')
+const iconSelector = $('div#icon-selector')
 
 var map;
 
 const db = new PouchDB('places-rev');
+
+const icons = ["avocado.png", "default.png", "overflow.png", "squirrel-detective.png"]
 
 let state = {
   isInteractiveMode: false,
   currentLocation: null,
   drawer: {
     isOpen: false,
-    view: null
+    view: 'locations'
   },
-  locations: []
+  locations: [],
+  isLoggedIn: false
 }
 
 // add location to map methods
-
 saveLocationButton.addEventListener('click', evt => {
   evt.stopPropagation()
-  let desc = locationDescription.innerHTML
+  let desc = locationDescription.innerHTML;
+  let name = locationName.value;
   state.currentLocation.description = desc;
+  state.currentLocation.name = name;
+  console.log("name", name);
   let currentLocation = {
     timestamp: state.currentLocation.timestamp,
     latitude: state.currentLocation.latitude,
     longitude: state.currentLocation.longitude,
-    description: state.currentLocation.description
+    description: state.currentLocation.description,
+    name: state.currentLocation.name,
+    icon: state.currentLocation.icon.name
   }
   db.post(currentLocation)
     .then( response => {
       state.locations.push(currentLocation)
       addMarkerToMap(currentLocation)
-      closeModal()      
+      closeModal() 
+      buildDrawerLocations()     
     })
     .catch( err => {
       console.log("there was an error ...\n", err)
@@ -52,9 +65,39 @@ openModalButton.addEventListener('click', evt => {
     .getCurrentPosition(openModal, errorPlaceFromGeo)
 }) 
 
+closeModalButton.addEventListener('click', closeModal)
+
+locationDescription.addEventListener('focus', evt =>{
+  evt.target.innerHTML = ""
+})
+
+locationName.addEventListener('input', evt => {
+  if (evt.target.value === ""){
+    saveLocationButton.disabled = true;
+  } else {
+    saveLocationButton.disabled = false;
+  }
+})
+
+locationDescription.addEventListener('input', evt => {
+  console.log("locationDesc input listener");
+  if (evt.target.value === ""){
+    evt.target.className = "placeholder-text"
+  } else {
+    evt.target.className = ""
+  }
+})
+
+function resetModalValues(){
+  locationName.value = ""
+  locationDescription.innerHTML = "Location Description ..."
+  locationDescription.className = 'placeholder-text'
+
+}
+
 function closeModalWindow(evt){
-  let closest = evt.target.closest('#add-location-modal')
-  if (evt.target === addLocationModal || closest){
+  let closest = evt.target.closest('#location-modal')
+  if (evt.target === locationModal || closest){
     return
   } else {
     closeModal()
@@ -64,18 +107,22 @@ function closeModalWindow(evt){
 }
 
 function closeModal(){
-  console.log("closeModal");
-  addLocationModal.classList.toggle('modal-closed')
+  locationModal.classList.toggle('modal-closed')
+  if (state.currentLocation.icon){
+    state.currentLocation.icon.element.classList.toggle('selected-icon')
+  }
   state.currentLocation = null;
+  resetModalValues()
   window.removeEventListener('click', closeModalWindow)
 }
 
 // opens the modal 
 function openModal(locationObj){
+  // history.pushState({}, 'open modal', '/open-modal')
   let { timestamp, coords } = locationObj;
   let { latitude, longitude } = coords
   state.currentLocation = { timestamp, latitude, longitude }
-  addLocationModal.classList.toggle('modal-closed')
+  locationModal.classList.toggle('modal-closed')
   window.addEventListener('click', closeModalWindow)
 }
 
@@ -86,31 +133,47 @@ function errorPlaceFromGeo(){
 // map methods
 
 function addMarkerToMap(markerObj){
-  console.log("markerObj", markerObj);
-  L.marker([markerObj.latitude, markerObj.longitude])
+  let { icon, latitude, longitude } = markerObj,
+    options = {}; 
+
+  if (icon){
+    options.icon = L.icon({
+      iconUrl: `icons/${icon}`,
+      // shadowUrl: icon.shadowUrl,
+      iconSize:     [38, 95], // size of the icon
+      shadowSize:   [50, 64], // size of the shadow
+      iconAnchor:   [22, 94], // point of the icon which will correspond to marker's location
+      shadowAnchor: [4, 62],  // the same for the shadow
+      popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+    })
+  }
+
+  L.marker([latitude, longitude], options)
     .addTo(map)
     .bindPopup(markerObj.description)
-    // .openPopup()
 }
 
 function startMap(locationObj){
   let { coords } = locationObj;
   let { latitude, longitude } = coords
   map = L.map('leaflet-map-container')
-    .setView([latitude, longitude], 18)
+    .setView([latitude, longitude], 16)
   L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/streets-v10/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1Ijoiam9leW9saXZlciIsImEiOiJjaXJwcDViZ2kwZ3NjZmttNjE0azhiZGZnIn0.BVe9J_2_RAf6WO8DwVyNVQ', {
     attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
   }).addTo(map);
-  var userMarker = L.userMarker([latitude, longitude], {pulsing: true, smallIcon:true});
+  var userMarker = L.userMarker([latitude, longitude], {pulsing: false, smallIcon:true});
   userMarker.addTo(map);
   db.allDocs({
     include_docs: true,
     attachements: true
   }).then(results => {
+    console.log("rewsults");
     results.rows.forEach( row => {
       state.locations.push(row.doc)
       addMarkerToMap(row.doc)
     })
+    buildDrawerLocations()
+    renderIconSelector()
   })
 }
 
@@ -124,30 +187,101 @@ function checkDrawerIsBuilt(view){
     return
   } else {
     if (view === "account") {
-      console.log("account");
       state.drawer.view = "account"
-      buildDrawerAccount()
+      showAccountDrawer()
     } else if (view==="locations") {
       state.drawer.view = "locations"
-      buildDrawerLocations()
+      showLocationsDrawer()
     } else {
       state.drawer.view = "locations"
-      buildDrawerLocations()
+      showLocationsDrawer()
     }
   }
 }
 
+var h = maquette.h;
+var projector = maquette.createProjector();
+
 function buildDrawerLocations(){
-  drawer.innerHTML = "Locations View"
+  // state.locations
+  locationsListContainer.innerHTML = ""
+  projector.append(locationsListContainer, renderLocations)
+}
+
+function renderLocations(){
+  return h('div.list-container', [
+    state.locations.map( (item, idx) => renderLocation(item, idx))
+  ])
+}
+
+
+function onListLocationClick(location, evt){
+  let idx = evt.target
+  map.setView([location.latitude, location.longitude], 16)
+  console.log("location", location);
+  console.log("evt", evt);
+  console.log("idx", idx);
+  console.log("focus")
+  // map.
+}
+
+function renderLocation(location, idx){
+  // console.log("location",location);
+  let { icon, name, description, latitude, longitude } = location
+  if (!icon){
+    icon = "default.png"
+  }
+  return h('div.location-list-item-container', {onclick: onListLocationClick.bind(null, location), "data-list-idx": idx}, [
+    h('div.location-list-item', {}, [
+      h('img', { src:`icons/${icon}`, alt:name, class: "list-item-icon" }),
+      h('p', name)
+    ])
+  ])
+}
+
+function renderIconSelector(){
+  icons.forEach( iconName => {
+    let iconButton = document.createElement('div')
+    iconButton.className = "icon-button"
+    iconButton.style.backgroundImage = `url(icons/${iconName})`
+    iconSelector.appendChild(iconButton)
+    iconButton.addEventListener('click', function(){
+      if (state.currentLocation.icon){
+        state.currentLocation.icon.element.classList.toggle('selected-icon')
+      }
+      state.currentLocation.icon = {
+        name: iconName,
+        element: iconButton
+      }
+      iconButton.classList.toggle('selected-icon')
+    })
+  })
+}
+
+function showLocationsDrawer(){
+  accountContainer.style.display = "none";
+  locationsContainer.style.display = "flex"
+}
+
+function showAccountDrawer(){
+  accountContainer.style.display = "flex";
+  locationsContainer.style.display = "none";
 }
 
 function buildDrawerAccount(){
-  drawer.innerHTML = "Account"
+  if (state.isLoggedIn){
+
+  } else {
+    buildLoginPage()
+  }
+}
+
+function buildLoginPage(){
 }
 
 // open drawer
 
-openLocationDrawer.addEventListener('click', toggleDrawer.bind(null, 'location'))
+openLocationDrawer.addEventListener('click', toggleDrawer.bind(null, 'locations'))
 openAccountDrawer.addEventListener('click', toggleDrawer.bind(null, 'account'))
 
 function toggleDrawer(view, event){
@@ -199,3 +333,32 @@ function checkClickDrawer(windowEvent) {
 
 // kick it off
 navigator.geolocation.getCurrentPosition(startMap, errorStartMap)
+
+
+
+// Style Utilities
+
+// roll your own ripple
+// when a ripple button is clicked
+// append a child div to it,
+// https://codepen.io/Craigtut/pen/dIfzv
+
+// const rippleButtons = $$('.ripple')
+// rippleButtons.forEach( btn => {
+//   btn.addEventListener('click', evt => {
+//     const dimensions = btn.getBoundingClientRect()
+//     console.log("evt", evt);
+//     evt.preventDefault()
+//     let $div = document.createElement('div'),
+//       xPos = evt.pageX - dimensions.left,
+//       yPos = evt.pageY - dimensions.top; 
+//     $div.className = "ripple-effect"
+//     console.log("$div", $div);
+//     $div.style.height = dimensions.height;
+//     $div.style.width = dimensions.height;
+//     $div.style.top = yPos 
+//     $div.style.left = xPos
+//     $div.style.background = "blue"
+//     btn.appendChild($div)
+//   })
+// })
