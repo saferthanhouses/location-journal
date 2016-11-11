@@ -1,3 +1,5 @@
+@import "bower_components/mui/src/sass/mui/_colors.scss";
+
 body {
   font-family: Arial, sans-serif;
   background-color: hsla(31,15%,50%,.1);
@@ -23,7 +25,7 @@ div#drawer {
   z-index: 30;
   border: 1px solid silver;
   background-color: #fafafa;
-  transition: transform 0.5s cubic-bezier(0.55, 0.055, 0.675, 0.19);
+  transition: transform 0.3s cubic-bezier(0.55, 0.055, 0.675, 0.19);
   will-change: transform;
 }
 
@@ -33,33 +35,64 @@ div#drawer {
 
 #locations-container {
   display: flex;
+  flex-direction: column;
 }
 
 #account-container {
-  display:none;
-  margin: 50px 20px;
+  display: none;
+  margin: 30px 6%;
   height: 300px;
-  width:80%;
+  width: 88%;
+}
+
+#login-container {
+  width: 100%;
+  display: flex;
+}
+
+#user-container {
+  width: 100%;
+  display: none;
 }
 
 #login-button {
   display: flex;
   align-items: center;
+  padding: 5px;
+  height: 60px;
   width: 100%;
 }
 
 #login-button p {
-  font-size: 24px;
+  margin: 0;
+  font-size: 16px;
 }
 
 #locations-list-container {
   width: 100%;
+  height: 100vh;
+  overflow-y: scroll;
+  margin-top: 70px;
+}
+
+#locations-header {
+  position: absolute;
+  width: 100%;
+  height: 70px;
+  border-bottom: 1px solid #dadada;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+}
+
+#locations-filter {
+
 }
 
 .location-list-item-container {
   box-sizing: border-box;
   width: 100%;
-  padding: 10px 10px 0 10px;
+  padding: 10px 0 0 0;
 }
 
 .list-container {
@@ -72,14 +105,35 @@ div#drawer {
   justify-content: flex-start;
   padding: 10px;
   align-items: center;
-  border: 1px solid #d3d3d3
+  border-top: 1px solid #d3d3d3;
+  border-bottom: 1px solid #d3d3d3;
+  cursor: pointer;
 }
 
 .list-item-icon {
   height: 42px;
   padding: 7px;
   box-shadow: 0 2px 10px 3px #d3d3d3;
+  box-sizing: content-box;
+}
 
+.location-item-options {
+  display: flex;
+  flex-direction: column;
+  margin-left: auto;
+}
+
+button.location-item-options-edit-button {
+  /*border: 1px solid #dadada;*/
+  width: 42px;
+  margin-bottom: 5px;
+  padding: 0;
+}
+
+button.location-item-options-delete-button {
+  width: 42px;
+  padding: 0;
+  margin-left: 0 !important;
 }
 
 #leaflet-map-container {
@@ -87,6 +141,13 @@ div#drawer {
   width:100%;
   height:100%;
   z-index:0;
+}
+
+.list-item-time {
+  margin: 10px;
+  height: 90%;
+  padding: 10px;
+  border: 1px solid #dadada;
 }
 
 div#bottom-menu {
@@ -102,19 +163,19 @@ div#bottom-menu {
   bottom: -35px;
 }
 
-.btm-nav-btn {
+#view-location-drawer.btm-nav-btn, #view-account-drawer.btm-nav-btn {
   background-color: rebeccapurple;
   font-size: 20px;
 }
 
 .btn-central {
-  border: 3px solid white;
+  border: 2px solid white;
 }
 
-.btn-side {
+#view-location-drawer.btn-side, #view-account-drawer.btn-side {
   position: absolute;
   z-index:1;
-  border-top: 3px solid white;
+  border-top: 2px solid white;
   width:36%;
   height:80px;
 }
@@ -128,6 +189,10 @@ button#view-account-drawer {
 }
 
 button#add-location {
+  border: 2px solid white;
+  padding: 0;
+  margin-top: 0;
+  margin-bottom: 0;
   width: 150px;
   height: 150px;
   border-radius: 50%;
@@ -135,7 +200,7 @@ button#add-location {
   font-size: 40px;
   outline: none;
   color: #F0F0F0;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+  box-shadow: 0px 3px 3px #d3d3d3;
   transition: all 0.3s cubic-bezier(.25,.8,.25,1);
   z-index:3;
 }
@@ -146,13 +211,13 @@ button#add-location:hover {
 
 #location-modal {
   position: fixed;
-  width: 100%;
-  height: 100%;
+  width: 90%;
+  height: 90%;
   /*border-radius: 15px;*/
   /*border: 1px solid silver;*/
-  /*left: 10%;*/
-  /*top: 10%;*/
-  transition: transform 0.35s cubic-bezier(0.550, 0.055, 0.675, 0.190);
+  left: 5%;
+  top: 5%;
+  transition: transform 0.3s cubic-bezier(0.550, 0.055, 0.675, 0.190);
   will-change: transform;
   /*display: flex;*/
   background-color: #fafafa;
@@ -171,16 +236,11 @@ button#add-location:hover {
 
 
 div#modal-location-desc {
-  margin: 20px auto;
-  padding: 10px;
-  height: 15%;
+  overflow-y: auto;
+  margin: 12px auto;
+  height: 33%;
   width: 90%;
-  background-color: #F0F0F0;
-  border-radius: 5px;
-  color: #212121;
-  font-size: 25px;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
-  border: 1px solid rebeccapurple;
+  min-height: 33%;
 }
 
 .placeholder-text {
@@ -197,13 +257,13 @@ button#save-location {
   /*height: 10%;*/
   /*margin-bottom: 20px;*/
   /*border-radius: 7px;*/
-  background-color: #4cae4c;
+  /*background-color: #4cae4c;
   border: 1px solid #4cae4c;
   box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
   font-size:27px;
   color: white;
   height:50px;
-  margin-top:auto;
+  margin-top:auto;*/
   /*border: 1px solid rebeccapurple;*/
 }
 
@@ -220,7 +280,7 @@ div#modal-header {
   flex-direction: row;
   justify-content: flex-start;
   color: white;
-  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22); 
+  box-shadow: 0 10px 10px rgba(0,0,0,0.22); 
   align-items: center;
 }
 
@@ -231,7 +291,7 @@ div#modal-header {
 }
 
 #modal-header-title {
-  margin: 0 auto;
+  margin: 0 33% 0 auto;
   font-size: 1.3em;
   font-weight: 800;
 }
@@ -242,8 +302,12 @@ div#modal-header {
   box-shadow: 0 0 2px rgba(0,0,0,.12),0 2px 2px rgba(0,0,0,.2);
 }
 
-#modal-header-quit:hover {
+.button-click-shadow {
   box-shadow: 0 10px 20px rgba(0,0,0,.19),0 6px 6px rgba(0,0,0,.23);
+}
+
+#modal-header-quit:hover {
+  /*box-shadow: 0 10px 20px rgba(0,0,0,.19),0 6px 6px rgba(0,0,0,.23);*/
 }
 
 #modal-header-save {
@@ -265,8 +329,7 @@ div#modal-header {
   color: #212121;
   margin-top: 15px;
   border: none;
-  height: 60px;
-  font-size: 25px;
+  font-size: 20px;
   background-color: #fafafa;
   padding: 10px;
   border-bottom: 1px solid lightgrey;
@@ -277,64 +340,68 @@ div#modal-header {
 }
 
 #icon-selector {
-  height: 40%;
+  height: 37%;
   width: 90%;
   border: 1px solid #d3d3d3;
-  margin: 20px auto;
+  margin: 0px auto;
   border-radius: 3px;
   display: flex;
   flex-direction: row;
   overflow: hidden;
+  flex-wrap: wrap;
+  align-content: flex-start;
 }
 
-.icon-button {
+#icon-selector .icon-button {
   /*background: url(https://unpkg.com/leaflet@1.0.1/dist/images/marker-icon-2x.png);*/
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
   margin: 6px;
   height: 48px;
-  width: 48px;
+  width: 30px;
   border: 1px solid #d3d3d3;
   position: relative;
+  min-width: 30px;
 }
 
 .selected-icon::after {
   content: '';
-  width: 30px;
-  height: 14px;
+  width: 40px;
+  height: 20px;
   position: absolute;
-  top: 4px;
-  left: 4px;
-  border: 10px solid #333;
+  top: 8px;
+  left: 7px;
+  border: 10px solid rgba(80, 172, 107, 0.91);
   border-top: none;
   border-right: none;
   background: transparent;
   opacity: 100;
   transform: rotate(-45deg);
   z-index: 100;
+  box-shadow: -1px 1px 0px 1px #548352;
 }
 
 @media (max-width: 420px){
-  .btn-side {
+  #view-location-drawer.btn-side, #view-account-drawer.btn-side {
     width: 36%;
   }
 }
 
 @media (min-width: 421px) and (max-width: 620px){
-  .btn-side {
+  #view-location-drawer .btn-side, #view-account-drawer.btn-side {
     width: 40%;
   }  
 }
 
 @media (min-width: 621px) and (max-width: 920px){
-  .btn-side {
+  #view-location-drawer.btn-side, #view-account-drawer.btn-side {
     width: 43%;
   }
 }
 
 @media (min-width: 920px){
-  .btn-side {
+  #view-location-drawer.btn-side, #view-account-drawer.btn-side {
     width: 47%;
   }
 }

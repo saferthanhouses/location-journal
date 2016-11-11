@@ -1,6 +1,7 @@
 const $ = document.querySelector.bind(document)
 const $$ = document.querySelectorAll.bind(document)
 
+// refactor all app / UI methods into own files
 const openModalButton = $('button#add-location')
 const locationModal = $('#location-modal')
 const saveLocationButton = $('button#save-location')
@@ -14,13 +15,19 @@ const accountContainer = $('div#account-container')
 const locationsContainer = $('div#locations-container')
 const locationsListContainer = $('div#locations-list-container')
 const iconSelector = $('div#icon-selector')
+const loginButton = $('button#login-button')
+const loginContainer = $('div#login-container')
+const userContainer = $('div#user-container')
 
+// Setup Globals
 var map;
-
 const db = new PouchDB('places-rev');
+const provider = new firebase.auth.GoogleAuthProvider();
 
-const icons = ["avocado.png", "default.png", "overflow.png", "squirrel-detective.png"]
+// Icons - move this - make dynamic
+const icons = ["avocado.png", "default.png", "overflow.png", "squirrel-detective.png", "dino-stomp.gif", "pirate-flag.gif", "the-horns.png", "coconut.png", "cooper-stomp.gif"]
 
+// Initial State
 let state = {
   isInteractiveMode: false,
   currentLocation: null,
@@ -29,8 +36,46 @@ let state = {
     view: 'locations'
   },
   locations: [],
-  isLoggedIn: false
+  isLoggedIn: false,
+  userMode: true,
+  explorationMode: false,
+  user: null
 }
+
+// watch for FBase change
+firebase.auth().onAuthStateChanged(function(user) {
+  if (user) {
+    console.log("user logged in");
+    state.isLoggedIn = true
+    buildDrawerAccount()
+  } else {
+    console.log("No user")
+    state.isLoggedIn = false
+    buildDrawerAccount()
+  }
+});
+
+// Login Button - requires FB auth 
+loginButton.addEventListener('click', (evt) => {
+  firebase.auth().signInWithPopup(provider).then(function(result) {
+    // This gives you a Google Access Token. You can use it to access the Google API.
+    var token = result.credential.accessToken;
+    // The signed-in user info.
+    console.log("user signed in");
+    state.user = result.user;
+    // ...
+  }).catch(function(error) {
+    // Handle Errors here.
+    console.log("error", error);
+    var errorCode = error.code;
+    var errorMessage = error.message;
+    // The email of the user's account used.
+    var email = error.email;
+    // The firebase.auth.AuthCredential type that was used.
+    var credential = error.credential;
+    // ...
+  });
+})
 
 // add location to map methods
 saveLocationButton.addEventListener('click', evt => {
@@ -64,6 +109,21 @@ openModalButton.addEventListener('click', evt => {
   navigator.geolocation
     .getCurrentPosition(openModal, errorPlaceFromGeo)
 }) 
+
+function toggleButtonShadow(evt){
+  console.log("toggle");
+  evt.target.classList.toggle('button-click-shadow')
+}
+
+function toggleButtonShadowAutomatic(evt){
+  console.log("click");
+  toggleButtonShadow(evt)
+  setTimeout(toggleButtonShadow.bind(null, evt), 500)
+}
+
+closeModalButton.addEventListener('mousedown', toggleButtonShadow)
+closeModalButton.addEventListener('mouseup', toggleButtonShadow)
+closeModalButton.addEventListener('click', toggleButtonShadowAutomatic)
 
 closeModalButton.addEventListener('click', closeModal)
 
@@ -138,11 +198,11 @@ function addMarkerToMap(markerObj){
 
   if (icon){
     options.icon = L.icon({
-      iconUrl: `icons/${icon}`,
+      iconUrl: `assets/icons/${icon}`,
       // shadowUrl: icon.shadowUrl,
-      iconSize:     [38, 95], // size of the icon
+      iconSize:     [34, 42], // size of the icon
       shadowSize:   [50, 64], // size of the shadow
-      iconAnchor:   [22, 94], // point of the icon which will correspond to marker's location
+      iconAnchor:   [22, 42], // point of the icon which will correspond to marker's location
       shadowAnchor: [4, 62],  // the same for the shadow
       popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
     })
@@ -156,7 +216,7 @@ function addMarkerToMap(markerObj){
 function startMap(locationObj){
   let { coords } = locationObj;
   let { latitude, longitude } = coords
-  map = L.map('leaflet-map-container')
+  map = L.map('leaflet-map-container', {dragging: false})
     .setView([latitude, longitude], 16)
   L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/streets-v10/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1Ijoiam9leW9saXZlciIsImEiOiJjaXJwcDViZ2kwZ3NjZmttNjE0azhiZGZnIn0.BVe9J_2_RAf6WO8DwVyNVQ', {
     attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
@@ -222,28 +282,43 @@ function onListLocationClick(location, evt){
   console.log("evt", evt);
   console.log("idx", idx);
   console.log("focus")
-  // map.
 }
 
 function renderLocation(location, idx){
   // console.log("location",location);
-  let { icon, name, description, latitude, longitude } = location
+  let { icon, name, description, latitude, longitude, timestamp } = location
   if (!icon){
     icon = "default.png"
   }
   return h('div.location-list-item-container', {onclick: onListLocationClick.bind(null, location), "data-list-idx": idx}, [
     h('div.location-list-item', {}, [
-      h('img', { src:`icons/${icon}`, alt:name, class: "list-item-icon" }),
-      h('p', name)
+      h('img', { src:`assets/icons/${icon}`, alt:name, class: "list-item-icon" }),
+      h('div', {class: "list-item-time"}, [
+        h('p', parseDate(timestamp))
+      ]),
+      h('p', name),
+      h('div', {class:"location-item-options"}, [
+        h('button', {class: "mui-btn location-item-options-edit-button"}, [
+          h('img', {src:"assets/svgs/edit_black.svg", class: "location-item-options-edit-img"})
+        ]),
+        h('button', {class: "mui-btn location-item-options-delete-button"}, [
+          h('img', {src: "assets/svgs/ic_close_black_48px.svg", class: "location-item-options-delete-img"})
+        ])
+      ])
     ])
   ])
+}
+
+function parseDate(ts){
+  let date = new Date(ts);
+  return `${date.getDate()}/${date.getMonth() + 1}`
 }
 
 function renderIconSelector(){
   icons.forEach( iconName => {
     let iconButton = document.createElement('div')
-    iconButton.className = "icon-button"
-    iconButton.style.backgroundImage = `url(icons/${iconName})`
+    iconButton.className = "icon-button mui-btn"
+    iconButton.style.backgroundImage = `url(assets/icons/${iconName})`
     iconSelector.appendChild(iconButton)
     iconButton.addEventListener('click', function(){
       if (state.currentLocation.icon){
@@ -270,9 +345,11 @@ function showAccountDrawer(){
 
 function buildDrawerAccount(){
   if (state.isLoggedIn){
-
+    userContainer.style.display = "flex"
+    loginContainer.style.display = "none"
   } else {
-    buildLoginPage()
+    userContainer.style.display = "none"
+    loginContainer.style.display = "flex"
   }
 }
 
