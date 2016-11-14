@@ -18,11 +18,15 @@ const iconSelector = $('div#icon-selector')
 const loginButton = $('button#login-button')
 const loginContainer = $('div#login-container')
 const userContainer = $('div#user-container')
+const deleteLocationModal = $('div#delete-location-modal')
+const confirmDeleteButton = $('button#confirm-delete-button')
+const cancelDeleteButton = $('button#cancel-delete-button')
 
 // Setup Globals
 var map;
 const db = new PouchDB('places-rev');
 const provider = new firebase.auth.GoogleAuthProvider();
+const fireDB = firebase.database();
 
 // Icons - move this - make dynamic
 const icons = ["avocado.png", "default.png", "overflow.png", "squirrel-detective.png", "dino-stomp.gif", "pirate-flag.gif", "the-horns.png", "coconut.png", "cooper-stomp.gif"]
@@ -39,7 +43,9 @@ let state = {
   isLoggedIn: false,
   userMode: true,
   explorationMode: false,
-  user: null
+  user: null,
+  locationsRef: null,
+  selectedLocation: null
 }
 
 // watch for FBase change
@@ -48,12 +54,39 @@ firebase.auth().onAuthStateChanged(function(user) {
     console.log("user logged in");
     state.isLoggedIn = true
     buildDrawerAccount()
+    // syncLocationsOnSignin(user)
   } else {
     console.log("No user")
     state.isLoggedIn = false
     buildDrawerAccount()
   }
 });
+
+/*
+i. first time user logs in
+- Users logs in 
+- when the auth state changes
+- check 
+ii. When the user returns to the app 
+- when the auth state changes we make sure the db is synced
+- 
+*/
+
+function syncLocationsOnSignin(user){
+  if (state.dbRef) return;
+  let { uid } = user;
+  let dbRef = fireDB.ref(`locations/${uid}`)
+  state.locationsRef = dbRef;
+  dbRef.once('value', snapshot => {
+    // if there are no locations
+    let locations = snapshot.val()
+    if (!locations){
+      // forEach location, make 
+      dbRef.set(state.locations)
+    } 
+    dbRef.push();
+  })
+}
 
 // Login Button - requires FB auth 
 loginButton.addEventListener('click', (evt) => {
@@ -204,13 +237,17 @@ function addMarkerToMap(markerObj){
       shadowSize:   [50, 64], // size of the shadow
       iconAnchor:   [22, 42], // point of the icon which will correspond to marker's location
       shadowAnchor: [4, 62],  // the same for the shadow
-      popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+      popupAnchor:  [-3, -46] // point from which the popup should open relative to the iconAnchor
     })
   }
 
-  L.marker([latitude, longitude], options)
+  markerObj.marker = L.marker([latitude, longitude], options)
     .addTo(map)
     .bindPopup(markerObj.description)
+}
+
+function removeMarkerFromMap(location){
+  map.removeLayer(location.marker)
 }
 
 function startMap(locationObj){
@@ -221,16 +258,21 @@ function startMap(locationObj){
   L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/streets-v10/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1Ijoiam9leW9saXZlciIsImEiOiJjaXJwcDViZ2kwZ3NjZmttNjE0azhiZGZnIn0.BVe9J_2_RAf6WO8DwVyNVQ', {
     attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
   }).addTo(map);
+  map.zoomControl.disable();
+  addMapEventListeners() 
   var userMarker = L.userMarker([latitude, longitude], {pulsing: false, smallIcon:true});
   userMarker.addTo(map);
   db.allDocs({
     include_docs: true,
     attachements: true
   }).then(results => {
+    // if (state.user){
+    //   syncLocationsOnSignin(state.user)
+    // }
     console.log("rewsults");
     results.rows.forEach( row => {
-      state.locations.push(row.doc)
       addMarkerToMap(row.doc)
+      state.locations.push(row.doc)
     })
     buildDrawerLocations()
     renderIconSelector()
@@ -240,6 +282,31 @@ function startMap(locationObj){
 function errorStartMap(){}
 
 // drawer rendering
+
+function addMapEventListeners(){
+
+  // TODO: refactor to be based on a drag distance
+
+  // Q. why does can it not clear the interval in the interval function?
+  let holding, timer, timePassed = 0
+  function checkTime(timer){
+    timePassed += 100
+    console.log("checkTime", timePassed);
+    if (timePassed > 500){
+      console.log("screen pulled")
+      clearInterval(timer)
+    }
+  }
+  map.on('mousedown', function(){
+    holding = true;
+    timer = setInterval(checkTime, 100)
+  })
+  map.on('mouseup', function(){
+    holding = false;
+    clearInterval(timer)
+    console.log("mouseup");
+  })
+}
 
 function checkDrawerIsBuilt(view){
   console.log("view", view);
@@ -276,36 +343,93 @@ function renderLocations(){
 
 
 function onListLocationClick(location, evt){
+  evt.stopPropagation()
   let idx = evt.target
   map.setView([location.latitude, location.longitude], 16)
-  console.log("location", location);
+  /*console.log("location", location);
   console.log("evt", evt);
-  console.log("idx", idx);
-  console.log("focus")
+  console.log("idx", idx);*/
+  console.log("onListLocationClick")
 }
+
+function onEditLocationClick(idx){
+
+}
+
+function onDeleteLocationClick(idx, evt){
+  evt.stopPropagation()
+  state.selectedLocation = idx;
+  closeDrawer()
+  deleteLocationModal.className = "open-modal-delete"
+}
+
+confirmDeleteButton.addEventListener('click', evt =>{
+  db.remove(state.locations[state.selectedLocation])
+    .then( result => {
+      var idx = state.selectedLocation
+      removeMarkerFromMap(state.locations[idx])
+      state.locations.splice(idx, 1)
+      state.selectedLocation = null;
+      deleteLocationModal.className = ""
+      buildDrawerLocations()
+      // TODO: FB - update firebase here
+    })
+    .catch( err => {
+      console.error(err)
+    })
+})
+
+cancelDeleteButton.addEventListener('click', evt =>{
+  state.selectedLocation = null;
+  deleteLocationModal.className = ""
+})
 
 function renderLocation(location, idx){
   // console.log("location",location);
-  let { icon, name, description, latitude, longitude, timestamp } = location
+  let { icon, name, description, latitude, longitude, timestamp, tags } = location
+  if (!tags){
+    tags = ["to visit", "shop", "sex"];
+  }
   if (!icon){
     icon = "default.png"
   }
   return h('div.location-list-item-container', {onclick: onListLocationClick.bind(null, location), "data-list-idx": idx}, [
-    h('div.location-list-item', {}, [
-      h('img', { src:`assets/icons/${icon}`, alt:name, class: "list-item-icon" }),
-      h('div', {class: "list-item-time"}, [
-        h('p', parseDate(timestamp))
+    h('div', {class: "location-list-item mui-panel"}, [
+      h('div', {class:"location-item-info"}, [
+        h('div', {class: "list-item-top-row"}, [
+          h('div', {class: "list-item-name"}, [
+            h('p', name),
+          ]),
+          h('div', {class: "list-item-time"}, [
+            h('p', parseDate(timestamp))
+          ])
+        ]),
+        h('div', {class: "list-item-bottom-row"}, [
+          h('img', { src:`assets/icons/${icon}`, alt:name, class: "list-item-icon" }),
+          renderTags(tags)
+        ])
       ]),
-      h('p', name),
       h('div', {class:"location-item-options"}, [
-        h('button', {class: "mui-btn location-item-options-edit-button"}, [
+        h('button', {class: "mui-btn mui-btn--raised location-item-options-edit-button", onclick: onEditLocationClick.bind(null, idx)}, [
           h('img', {src:"assets/svgs/edit_black.svg", class: "location-item-options-edit-img"})
         ]),
-        h('button', {class: "mui-btn location-item-options-delete-button"}, [
+        h('button', {class: "mui-btn mui-btn--raised location-item-options-delete-button", onclick: onDeleteLocationClick.bind(null, idx)}, [
           h('img', {src: "assets/svgs/ic_close_black_48px.svg", class: "location-item-options-delete-img"})
         ])
       ])
     ])
+  ])
+}
+
+function renderTags(tags){
+  return h('div.tag-container', [
+    tags.map( (item, idx) => renderTag(item, idx))
+  ]) 
+}
+
+function renderTag(tag){
+  return h('div', {class: "tag-item"}, [
+    h('p', tag)
   ])
 }
 
@@ -394,7 +518,6 @@ function checkClickDrawer(windowEvent) {
   }
 }
 
-
 // //  open account drawer 
 // openAccountDrawer.addEventLister('click', toggleAccountDrawer)
 
@@ -411,6 +534,18 @@ function checkClickDrawer(windowEvent) {
 // kick it off
 navigator.geolocation.getCurrentPosition(startMap, errorStartMap)
 
+// Schema
+
+  // let currentLocation = {
+  //   timestamp: state.currentLocation.timestamp,
+  //   latitude: state.currentLocation.latitude,
+  //   longitude: state.currentLocation.longitude,
+  //   description: state.currentLocation.description,
+  //   name: state.currentLocation.name,
+  //   icon: state.currentLocation.icon.name
+  //   tags: [String]
+  //   visitCount: 0
+  // }
 
 
 // Style Utilities

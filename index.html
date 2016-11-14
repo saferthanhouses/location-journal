@@ -43,16 +43,31 @@
           <path d="M0 0h24v24H0z" fill="none"/>
         </svg>
       </div>
-      <div id="modal-header-title" class="modal-header-item">New Location</div>
+      <div id="modal-header-title" class="modal-header-item">Location</div>
       <div id="modal-header-save" class="modal-header-item">SAVE</div>
     </div>
     <div id="modal-content">
-      <input type="text" placeholder="Location Name" id="modal-location-name"/>
+      <input type="text" placeholder="Where Dis?" id="modal-location-name"/>
       <div id="icon-selector"></div>
       <div contenteditable="" id="modal-location-desc" class="placeholder-text mui-panel">
-        Event Description ...
+        Da Infoz ...
       </div>
-      <button id="save-location" class="mui-btn mui-btn--raised mui-btn--primary" disabled>Remember This Place</button>
+      <button id="save-location" class="mui-btn mui-btn--raised mui-btn--primary" disabled>Add To Map</button>
+    </div>
+  </div>
+  <div id="delete-location-modal">
+    <div class="modal-content-delete">
+      <div class="modal-delete-message">
+        Are you sure you want to delete this item?
+      </div>
+    </div>
+    <div class="modal-options-delete">
+      <button class="mui-btn" id="cancel-delete-button">
+        Cancel
+      </button>
+      <button class="mui-btn" id="confirm-delete-button">
+        Confirm
+      </button>
     </div>
   </div>
   <div id="drawer" class="drawer-closed">
