@@ -47,8 +47,23 @@
       <div id="modal-header-save" class="modal-header-item">SAVE</div>
     </div>
     <div id="modal-content">
-      <input type="text" placeholder="Where Dis?" id="modal-location-name"/>
+      <div class="mui-textfield mui-textfield--float-label" id="modal-location-name-container">
+        <input type="text" id="modal-location-name-input">
+        <label>Where?</label>
+      </div>
+      <!-- <input type="text" placeholder="Where Dis?" id="modal-location-name"/> -->
       <div id="icon-selector"></div>
+      <div id="modal-location-tags">
+        <p id="modal-location-tags-title">Gimme some tags...</p>
+        <!-- <input name="new-tag" id="modal-new-tag" type="text" placeholder="New Tag"/>
+ -->
+        <form class="mui-form--inline" id="tags-form">
+          <div class="mui-textfield">
+            <input type="text" id="tags-text-input">
+          </div>
+        </form>
+        <div class="tags-container"></div>
+      </div>
       <div contenteditable="" id="modal-location-desc" class="placeholder-text mui-panel">
         Da Infoz ...
       </div>
@@ -131,5 +146,6 @@
   <script src="bower_components/leaflet-usermarker-master/src/leaflet.usermarker.js"></script>
   <script src="//cdn.muicss.com/mui-latest/js/mui.min.js"></script>
   <script src="app.js"></script>
+  <script src="app/tags.js"></script>
 </body>
 </html>

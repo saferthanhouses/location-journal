@@ -6,7 +6,8 @@ const openModalButton = $('button#add-location')
 const locationModal = $('#location-modal')
 const saveLocationButton = $('button#save-location')
 const locationDescription = $('#modal-location-desc')
-const locationName = $('#modal-location-name')
+const locationNameContainer = $('#modal-location-name-container')
+const locationName = $('#modal-location-name-input')
 const closeModalButton = $('#modal-header-quit') 
 const openLocationDrawer = $('button#view-location-drawer')
 const openAccountDrawer = $('button#view-account-drawer')
@@ -110,6 +111,17 @@ loginButton.addEventListener('click', (evt) => {
   });
 })
 
+locationName.addEventListener('focus', function(){
+  // center the field more
+  console.log("focus!!!!");
+  locationDescription.style.display = "none"
+})
+
+locationName.addEventListener('blur', function(){
+  console.log("lost focus");
+  locationDescription.style.display = "flex"
+})
+
 // add location to map methods
 saveLocationButton.addEventListener('click', evt => {
   evt.stopPropagation()
@@ -117,7 +129,8 @@ saveLocationButton.addEventListener('click', evt => {
   let name = locationName.value;
   state.currentLocation.description = desc;
   state.currentLocation.name = name;
-  console.log("name", name);
+  state.currentLocation.tags = tagsContainer.currentTags
+  tagsContainer.resetTags()
   let currentLocation = {
     timestamp: state.currentLocation.timestamp,
     latitude: state.currentLocation.latitude,
@@ -243,7 +256,7 @@ function addMarkerToMap(markerObj){
 
   markerObj.marker = L.marker([latitude, longitude], options)
     .addTo(map)
-    .bindPopup(markerObj.description)
+    .bindPopup(markerObj.name)
 }
 
 function removeMarkerFromMap(location){
@@ -258,7 +271,13 @@ function startMap(locationObj){
   L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/streets-v10/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1Ijoiam9leW9saXZlciIsImEiOiJjaXJwcDViZ2kwZ3NjZmttNjE0azhiZGZnIn0.BVe9J_2_RAf6WO8DwVyNVQ', {
     attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
   }).addTo(map);
+  // show zoom control inactive and disable zoom
   map.zoomControl.disable();
+  map.touchZoom.disable();
+  map.doubleClickZoom.disable();
+  map.scrollWheelZoom.disable();
+  map.boxZoom.disable();
+  map.keyboard.disable();
   addMapEventListeners() 
   var userMarker = L.userMarker([latitude, longitude], {pulsing: false, smallIcon:true});
   userMarker.addTo(map);
@@ -422,7 +441,7 @@ function renderLocation(location, idx){
 }
 
 function renderTags(tags){
-  return h('div.tag-container', [
+  return h('div.tags-container', [
     tags.map( (item, idx) => renderTag(item, idx))
   ]) 
 }
