@@ -1,0 +1,1 @@
+import deleteModal from './deleteModal'

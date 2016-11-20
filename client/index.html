@@ -28,11 +28,11 @@
     };
     firebase.initializeApp(config);
   </script>
-  <link href="reset.css" rel="stylesheet"/>
-  <link href="style.css" rel="stylesheet"/>
+  <link href="styles.css" rel="stylesheet"/>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
   <link rel="stylesheet" href="bower_components/leaflet-usermarker-master/src/leaflet.usermarker.css"/>
   <link href="//cdn.muicss.com/mui-latest/css/mui.min.css" rel="stylesheet" type="text/css" />
+  <!-- <link rel="stylesheet" href="../dist/geojsonautocomplete.min.css" />   -->
 </head>
 <body>
   <div id="location-modal" class="modal-closed">
@@ -54,12 +54,11 @@
       <!-- <input type="text" placeholder="Where Dis?" id="modal-location-name"/> -->
       <div id="icon-selector"></div>
       <div id="modal-location-tags">
-        <p id="modal-location-tags-title">Gimme some tags...</p>
         <!-- <input name="new-tag" id="modal-new-tag" type="text" placeholder="New Tag"/>
  -->
         <form class="mui-form--inline" id="tags-form">
           <div class="mui-textfield">
-            <input type="text" id="tags-text-input">
+            <input type="text" id="tags-text-input" placeholder="Gimme a tag ...">
           </div>
         </form>
         <div class="tags-container"></div>
@@ -100,23 +99,48 @@
     <div id="locations-container">
       <div id="locations-header">
         <div id="locations-filter">
-          <div class="mui-dropdown">
-            <button class="mui-btn mui-btn--primary" data-mui-toggle="dropdown">
-                Sort Locations
-                <span class="mui-caret"></span>
-            </button>
-            <ul class="mui-dropdown__menu">
-              <li><a href="#">Time</a></li>
-              <li><a href="#">Location</a></li>
-              <li><a href="#">Icon</a></li>
-              <li><a href="#">President</a></li>
-            </ul>
+          <div class="mui-select" id="sort-locations-dropdown">
+            <select id="sort-locations-select">
+              <option selected>Date Added</option>
+              <option>Location</option>
+              <option>Icon</option>
+              <option>President</option>
+              <option>Distance</option>
+            </select>
+            <label>Sort Locations</label>
+          </div>
+          <div class="mui-divider" id="search-divider"></div>
+          <div id="tag-search">
+            <div class="mui-textfield mui-textfield--float-label">
+              <input type="text" id="tag-search-input">
+              <label>Search Tags</label>
+            </div>
           </div>
         </div>
+        <div id="show-search"></div>
       </div>
-      <div id="locations-list-container"></div>
+      <div id="locations-list-container">
+      </div>
     </div>
   </div>
+  <!-- todo: 3d button flip -->
+  <button id="mode-icon-container" class="mui-btn mui-btn--fab mui-btn--accent">
+    <svg fill="#000000" height="32" viewBox="0 0 24 24" width="48" xmlns="http://www.w3.org/2000/svg" id="mode-icons">
+      <g id="accessibility-svg">
+        <path d="M0 0h24v24H0z" stroke-width="1" fill="none"/>
+        <path stroke-width="1" stroke="none" fill="white" d="M12 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm9 7h-6v13h-2v-6h-2v6H9V9H3V7h18v2z"/>
+      </g>
+      <g id="location-svg">
+        <!-- <path stroke-width="1" stroke="black" d="M0 0h24v24H0z" fill="none"/> -->
+        <path stroke="none" fill="white" stroke-width="1" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
+      </g>
+    </svg>
+  </button>
+  <form id="search-location-bar">
+    <div class="">
+      <input type="text" placeholder="find places" name="place-search" id="place-search-input">
+    </div>
+  </form>
   <div id="leaflet-map-container"></div>
   <div class="container">
     <div id="bottom-menu">
@@ -140,12 +164,13 @@
       </button>
     </div>
   </div>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/SVG-Morpheus/0.3.2/svg-morpheus.js"></script>
+  <!-- <script src="../dist/geojsonautocomplete.min.js"></script> -->
   <script src="//cdnjs.cloudflare.com/ajax/libs/maquette/2.4.1/maquette.min.js"></script>
   <script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
   <script src="//cdn.jsdelivr.net/pouchdb/6.0.7/pouchdb.min.js"></script>
   <script src="bower_components/leaflet-usermarker-master/src/leaflet.usermarker.js"></script>
   <script src="//cdn.muicss.com/mui-latest/js/mui.min.js"></script>
-  <script src="app.js"></script>
-  <script src="app/tags.js"></script>
+  <script src="bundle.js"></script>
 </body>
 </html>
