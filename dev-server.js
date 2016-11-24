@@ -11,17 +11,32 @@ const mkdirp = bluebird.promisify(require('mkdirp'));
 const rimraf = bluebird.promisify(require('rimraf'));
 const fs = bluebird.promisifyAll(require('fs'));
 const path = require('path')
+const commonJs = require('rollup-plugin-commonjs')
+const nodeResolve = require('rollup-plugin-node-resolve')
+
+function timeNow(){
+  let time = new Date()
+  return `${time.getHours()}:${time.getMinutes()}`
+}
+
 
 let cache;
 
 function bundleJSDev(){
-  console.log(chalk.green("bundling"));
+  console.log(chalk.green("bundling js ..."));
   return rollup.rollup({
-    entry: 'client/js/app.js',
+    entry: 'client/js/index.js',
     plugins: [
       babel({
         exclude: 'node_modules/**'
       }),
+      nodeResolve({
+        jsnext: true,
+        main: true
+      }),
+      commonJs({
+        include: 'node_modules/**'
+      })
     ],
     cache: cache
   })
@@ -31,6 +46,9 @@ function bundleJSDev(){
       format: 'cjs',
       dest: './build/bundle.js'
     });
+  })
+  .then( ()=> {
+    console.log(chalk.blue("bundled", timeNow()));
   })
   .catch( err => {
     console.log(chalk.red('error in build'))
@@ -94,6 +112,7 @@ function startDevBuild(){
       return Promise.all([buildHTML(), buildCss(), buildStaticAssets(), bundleJSDev(), copyModules()])
     })
     .then( () => {
+      // why does node-watch not work for single files but fs.watch does?
       fs.watch('./client/index.html', function(){
         return buildHTML()
       })

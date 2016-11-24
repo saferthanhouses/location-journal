@@ -1,49 +1,9 @@
-// const tagsInput = $('#tags-text-input')
-// const tagsForm = $('#tags-form')
-// const tagsContainer = $('#location-modal .tags-container')
-
-// let iconSelectorStyles = {}
-
-// let currentTags = []
-
-// tagsInput.addEventListener('focus', function(){
-//   iconSelectorStyles.height = iconSelector.style.height
-//   iconSelectorStyles.padding = iconSelector.style.padding
-//   iconSelectorStyles.opacity = iconSelector.style.opacity;
-//   iconSelector.style.height = 0;
-//   iconSelector.style.padding = "0px";
-//   iconSelector.style.opacity = "0";
-// })
-
-// tagsInput.addEventListener('blur', function(){
-//   iconSelector.style.height = iconSelectorStyles.height;
-//   iconSelector.style.padding = iconSelectorStyles.padding;
-//   iconSelector.style.opacity = iconSelectorStyles.opacity;
-// })
-
-// tagsForm.addEventListener('submit', function(evt){
-//   evt.preventDefault();
-//   let tag = tagsInput.value
-//   currentTags.push(tag);
-//   addTag(tag)
-//   evt.target.blur()
-//   tagsInput.value = ""
-// })
-
-// function addTag(tag){
-//   let newTag = document.createElement('div')
-//   newTag.classList = "tag-item"
-//   newTag.innerHTML = tag;
-//   tagsContainer.appendChild(newTag)
-// }
-
-
+import { $ } from '../utils/'
 
 class TagsContainer {
   constructor(){
     this.tagsContainerElt = $('#location-modal .tags-container')
     this.tagsInputElt = $('#tags-text-input')
-    console.log("this.tagsInputElt", this.tagsInputElt);
     this.tagsFormElt = $('#tags-form')
     this.state = {
       currentTags: [],
@@ -96,4 +56,4 @@ class TagsContainer {
   }
 }
 
-const tagsContainer = new TagsContainer()
+export default TagsContainer

@@ -11,6 +11,12 @@ Using native html vs. react/ prect
 - Not having to use a framework to create elements - decorating existing elements with functionality.
 - How much of an overhead do we get from using polymer ?
 
-Todo Sun 20/11 - 
-Create a bundle / build pipeline so that we can use import / export and for a module system
-Stage 1) Bundle with rollup and babel inputs
+
+
+- Added a build pipeline using rollup for modules (this doesn't seem to wrap our code properly though - still have globals?)
+
+- Explorator features: attempted to implement own state management & rendering pattern using events
+
+
+
+- Notes on new vanilla js - rendering / data set
