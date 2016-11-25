@@ -97,6 +97,10 @@ img.leaflet-marker-icon.leaflet-zoom-animated.leaflet-interactive.just-added{
   transform
 }*/
 
+.popup-title {
+  text-decoration: underline;
+}
+
 #mode-icon-container {
   position: fixed;
   z-index: 15;
@@ -245,8 +249,10 @@ div.location-list-item {
   color: rgba(0,0,0,0.77);
   font-size: 12px;
   height: 25px;
-  background-color: #FFF;
-  box-shadow: 0 2px 2px 0 rgba(0,0,0,.16),0 0 2px 0 rgba(0,0,0,.12);
+  /*background-color: #FFF;*/
+  /*box-shadow: 0 2px 2px 0 rgba(0,0,0,.16),0 0 2px 0 rgba(0,0,0,.12);*/
+  background-color: rebeccapurple;
+  color: white;
 }
 
 button.location-item-options-edit-button {

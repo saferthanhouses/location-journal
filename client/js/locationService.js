@@ -11,8 +11,8 @@ export function getCurrentPosition(){
 
 export function extractLatLng({coords}){
   console.log("coords", coords);
-  let { latitude, longitude, accuracy } = coords;
-  return {latitude, longitude, accuracy}
+  let { latitude, longitude } = coords;
+  return {latitude, longitude}
 }
 
 export function extractLatLngAndTime({coords, timestamp}){

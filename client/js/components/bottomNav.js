@@ -31,7 +31,7 @@ class BottomNav {
   }
   openAccountClickHandler(evt){
     evt.stopPropagation()
-    state.update('open_account_drawer')
+    state.update('request_open_account_drawer')
   }
 }
 

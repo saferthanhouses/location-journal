@@ -26,6 +26,9 @@ class Map {
     this.switchToExplorationMode = this.switchToExplorationMode.bind(this)
     this.setMapView = this.setMapView.bind(this)
     this.requestOpenLocationModal = this.requestOpenLocationModal.bind(this)
+    this.createPopup = this.createPopup.bind(this)
+    this.createTitle = this.createTitle.bind(this)
+    this.createDescription = this.createDescription.bind(this)
     // suscribe to state
     this.addStateListeners()
     // kick off rendering
@@ -163,12 +166,35 @@ class Map {
       })
     }
 
+    let popupMarkdown = this.createPopup(location)
+
     let marker = L.marker([latitude, longitude], options)
       .addTo(this.map)
-      .bindPopup(name)
-    
-    console.log("location.marker", marker);
+      .bindPopup(popupMarkdown)
+      
+    // console.log("location.marker", marker);
     this.icons.push(marker)
+  }
+  createPopup(location){
+    let popup = 
+      `${this.createTitle(location.name)}
+       ${this.createDescription(location.description)}
+      `
+    return popup
+  }
+  createDescription(description){
+    if (description){
+      return `<p>${description}</p>`
+    } else {
+      return ''
+    }
+  }
+  createTitle(name){
+    if (name){
+      return `<h4 class="popup-title">${name}</h4>`
+    } else {
+      return ""
+    }
   }
   removeLocation(){
     console.log("remove location");

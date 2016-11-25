@@ -35,6 +35,8 @@ class Drawer {
     this.closeDrawer = this.closeDrawer.bind(this)
     this.sort = this.sort.bind(this)
     this.filter = this.filter.bind(this)
+    this.openAccountDrawer = this.openAccountDrawer.bind(this)
+    this.closeDrawerToChange = this.closeDrawerToChange.bind(this)
     // pass in state
     this.state = state
     // setup state event listeners
@@ -126,18 +128,32 @@ class Drawer {
     state.subscribe('open_locations_drawer', this.openLocationsDrawer)
     // state.subscribe('build_locations_filtered', this.filterLocations)
     state.subscribe('close_drawer', this.closeDrawer)
+    state.subscribe('open_account_drawer', this.openAccountDrawer)
+    state.subscribe('close_drawer_to_change', this.closeDrawerToChange)
   }
   closeDrawer(){
+    console.log("close drawer");
     if (!this.state.drawer.isOpen) return
+    console.log("closing drawer");
     this.$drawer.classList.toggle('drawer-closed')
     state.update('drawer_closed')
+  }
+  closeDrawerToChange({view}){
+    const that = this
+    this.closeDrawer()
+    if (view === 'locations'){
+      setTimeout( that.openLocationsDrawer, 500)
+    } else if (view === 'account'){
+      setTimeout(that.openAccountDrawer, 500)
+    }
   }
   openLocationsDrawer(){
     console.log("openLocationsDrawer");
     this.showLocationsDrawer()
     this.$drawer.classList.toggle('drawer-closed')
-    state.update('drawer_open')
+    state.update('drawer_open', {view: "locations"})
   }
+
   checkDrawerIsBuilt(view){
     if (view === this.state.drawer.view) {
       return
@@ -157,6 +173,11 @@ class Drawer {
   showLocationsDrawer(){
     this.$accountContainer.style.display = "none";
     this.$locationsContainer.style.display = "flex"
+  }
+  openAccountDrawer(){
+    this.showAccountDrawer()
+    this.$drawer.classList.toggle('drawer-closed')
+    state.update('drawer_open', {view: "account"})
   }
   showAccountDrawer(){
     this.$accountContainer.style.display = "flex";
@@ -180,7 +201,7 @@ function renderTags(tags){
 }
 
 function renderTag(tag){
-  return h('div', {class: "tag-item"}, [
+  return h('div.tag-item', [
     h('p', tag)
   ])
 }

@@ -85,10 +85,10 @@ state.update = function(event, payload){
       return locationSaved(payload)
     case "open_locations_drawer":
       return openLocationsDrawer()
-    case "open_account_drawer":
-      return openAccountDrawer()
+    case "request_open_account_drawer":
+      return requestOpenAccountDrawer()
     case "drawer_open":
-      return drawerOpen()
+      return drawerOpen(payload)
     case "close_drawer":
       return closeDrawer()
     case "drawer_closed":
@@ -150,9 +150,10 @@ function closeDrawer(){
   state.emit('close_drawer')
 }
 
-function drawerOpen(){
+function drawerOpen({view}){
   state.drawer.isOpen = true;
   state.drawer.isOpening = false;
+  state.drawer.view = view
   state.emit('drawer_open')
 }
 
@@ -162,8 +163,16 @@ function openLocationsDrawer(){
   state.emit('open_locations_drawer')
 }
 
-function openAccountDrawer(){
-
+function requestOpenAccountDrawer(){
+  if (state.drawer.isOpen && state.drawer.view === 'account') return
+  else if (!state.drawer.isOpen){
+    console.log("!state.drawer.isOpen");
+    state.emit('open_account_drawer')
+  } else if (state.drawer.isOpen && state.drawer.view === "locations"){
+    console.log("locations opens");
+    state.emit('close_drawer_to_change', {view: 'account'})
+  }
+  // state.emit('request_open_account_drawer')
 }
 
 function locationSaved({location}){
@@ -247,12 +256,20 @@ function changeMode(payload){
     state.emit('change_mode_to_exploration')
     // state.emit('change_mode_to_user')
   } else {
-    state.userMode = true
-    state.explorationMode = false
-    state.currentMode = "user"
-    // state.emit('change_mode_to_exploration')
-    state.emit('change_mode_to_user')
-    //   currentMode: "user",
+    getCurrentPosition()
+      .then( extractLatLng )
+      .then( location => {
+        state.currentLocation = location
+        state.userMode = true
+        state.explorationMode = false
+        state.currentMode = "user"
+        // state.emit('change_mode_to_exploration')
+        state.emit('change_mode_to_user')
+        //   currentMode: "user",
+      })
+      .catch( err => {
+        console.error("problem getting user position", err)
+      })
   }
 }
 

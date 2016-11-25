@@ -31,10 +31,10 @@ class Icons {
     }
   }
   userMode(){
-    this.iconSet.to('accessibility-svg', {duration: 300, easing: 'cubic-in-out'})
+    this.iconSet.to('location-svg', {duration: 300, easing: 'cubic-in-out'})
   }
   explorationMode(){
-    this.iconSet.to('location-svg', {duration: 300, easing: 'cubic-in-out'})
+    this.iconSet.to('accessibility-svg', {duration: 300, easing: 'cubic-in-out'})
   }
   onClickHandler(){
     if (state.userMode){
