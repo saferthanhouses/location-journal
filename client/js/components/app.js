@@ -7,6 +7,7 @@ import Drawer from './drawer'
 // import IconSelector from './iconSelector'
 import Icons from './icons'
 import DB from '../models/db'
+import DeleteModal from './deleteModal'
 
 class App {
   constructor(state){
@@ -15,7 +16,7 @@ class App {
     this.setupDB()
   }
   setupDB(){
-    this.db = new DB()
+    this.db = new DB(this.state)
   }
   init(){
     this.appWindow = new AppWindow()
@@ -24,6 +25,7 @@ class App {
     this.locationModal = new LocationModal(this.state, 'div#location-modal')
     this.drawer = new Drawer(this.state, 'div#drawer')
     this.bottomNav = new BottomNav()
+    this.deleteModal = new DeleteModal()
     // this.drawer = new Drawer('', state)
     // this.iconSelector = new IconSelector('', state)
   }

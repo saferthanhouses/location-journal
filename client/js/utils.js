@@ -59,5 +59,8 @@ export function filterLocations(locations, val){
   })
 }
 
+export function getTimestamp(){
+  return (new Date()).getTime()
+}
 
 export const $ = document.querySelector.bind(document)

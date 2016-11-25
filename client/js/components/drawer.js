@@ -116,8 +116,9 @@ class Drawer {
   onEditLocationClick(){
 
   }
-  onDeleteLocationClick(){
-
+  onDeleteLocationClick(idx, evt){
+    evt.stopPropagation()
+    state.update('open_delete_location', { idx })
   }
   addStateListeners(){
     // state.subscribe('load_locations', this.buildLocations)

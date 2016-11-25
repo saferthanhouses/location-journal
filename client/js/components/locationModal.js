@@ -9,7 +9,7 @@ class locationModal {
     this.$name = $('#modal-location-name-input')
     this.$saveButton = $('button#save-location')
     this.$closeButton = $('#modal-header-quit')
-
+    this.$coords = $('#location-coords-input')
     this.state = state
     this.iconSelector = new IconSelector()
     this.tagsContainer = new TagsContainer()
@@ -19,6 +19,7 @@ class locationModal {
     this.nameInputValidation = this.nameInputValidation.bind(this)
     this.updateCloseModal = this.updateCloseModal.bind(this)
     this.save = this.save.bind(this)
+    this.parseCoords = this.parseCoords.bind(this)
 
     this.addStateListeners()
     this.addEventListeners()
@@ -32,11 +33,23 @@ class locationModal {
     this.$closeButton.addEventListener('click', this.updateCloseModal)
     this.$saveButton.addEventListener('click', this.save)
   }
+  parseCoords(coords){
+    let {latitude, longitude} = coords
+    return `${latitude}, ${longitude}`
+  }
   open(){
+    console.log("this.$coords", this.coords);
+    if (this.state.explorationMode){
+      let loc = this.state.locationModal.location
+      this.$coords.value = this.parseCoords(loc)
+    } else {
+      this.$coords.value = "current location"
+    }
     this.$modal.classList.toggle('modal-closed')
   }
   close(){
     this.$name.value = ""
+    this.$coords.value = ""
     this.iconSelector.reset()
     this.tagsContainer.resetTags()
     this.$modal.classList.toggle('modal-closed')

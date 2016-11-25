@@ -19,12 +19,13 @@ class Map {
     this.state = state;
     this.icons = []
     // bind methods
-    this.dblClickExplorationHandler = this.dblClickExplorationHandler.bind(this)
+    this.openLocationModalExploration = this.openLocationModalExploration.bind(this)
     this.addLocation = this.addLocation.bind(this)
     this.removeLocation = this.removeLocation.bind(this)
     this.switchToUserMode = this.switchToUserMode.bind(this)
     this.switchToExplorationMode = this.switchToExplorationMode.bind(this)
     this.setMapView = this.setMapView.bind(this)
+    this.requestOpenLocationModal = this.requestOpenLocationModal.bind(this)
     // suscribe to state
     this.addStateListeners()
     // kick off rendering
@@ -54,10 +55,19 @@ class Map {
   }
   addStateListeners(){
     state.subscribe('add_location', this.addLocation)
-    state.subscribe('remove_location', this.removeLocation)
+    state.subscribe('location_removed', this.removeLocation)
     state.subscribe('change_mode_to_user', this.switchToUserMode)
     state.subscribe('change_mode_to_exploration', this.switchToExplorationMode)
     state.subscribe('set_map_view', this.setMapView)
+    state.subscribe('request_open_location_modal', this.requestOpenLocationModal)
+  }
+  requestOpenLocationModal(){
+    console.log("requestOpenLocationModal");
+    if (this.state.userMode){
+      state.update('open_location_modal')
+    } else {
+      this.openLocationModalExploration()
+    }
   }
   updateMode(){
     if (this.state.userMode){
@@ -81,7 +91,7 @@ class Map {
     //   this.$mapContainer.removeEventListener('mousemove', checkDistance)
     // })
 
-    this.map.on('dblclick', this.dblClickExplorationHandler)
+    this.map.on('dblclick', this.openLocationModalExploration)
 
   }
   checkDistance(evt){
@@ -93,22 +103,14 @@ class Map {
       this.$mapContainer.removeEventListener('mousemove', this.checkDistance)
     }
   }
-   dblClickExplorationHandler(evt){
+   openLocationModalExploration(evt){
     if (!this.state.explorationMode) return;
-    console.log("double clicked");
     let center = this.map.getCenter()
-    let timestamp = new Date().getTime() / 1000
     let locationObj = {
       latitude: center.lat,
-      longitude: center.long,
-      timestamp
+      longitude: center.lng,
     }
-    console.log(locationObj);
-
-    // dispatch & open from state
-    openModal(locationObj)
-    // openModal()
-
+    state.update('open_location_modal', {location: locationObj})
   }
   disableAllZoom(){
     this.map.zoomControl.disable();
@@ -128,6 +130,8 @@ class Map {
     this.map.boxZoom.disable();
     this.map.keyboard.disable();
     this.map.dragging.disable()
+
+    console.log("this.state.currentLocation", this.state.currentLocation);
 
     // let's subscribe to updates to the store so that we don't have to manually 
     // pass in every needed thing everytime we want to update the ui
@@ -155,18 +159,26 @@ class Map {
         shadowSize:   [50, 64], // size of the shadow
         iconAnchor:   [17, 21], // point of the icon which will correspond to marker's location
         shadowAnchor: [4, 62],  // the same for the shadow
-        popupAnchor:  [-3, -46] // point from which the popup should open relative to the iconAnchor
+        popupAnchor:  [0, -24] // point from which the popup should open relative to the iconAnchor
       })
     }
 
-    location.marker = L.marker([latitude, longitude], options)
+    let marker = L.marker([latitude, longitude], options)
       .addTo(this.map)
       .bindPopup(name)
     
-    this.icons .push(location.marker)
+    console.log("location.marker", marker);
+    this.icons.push(marker)
   }
-  removeLocation({location}){
-    map.removeLayer(location.marker)
+  removeLocation(){
+    console.log("remove location");
+    let idx = this.state.selectedLocation,
+      icon = this.icons[idx]
+    try {
+      this.map.removeLayer(icon)
+    } catch (err){
+      console.error(err)
+    }
   }
   setMapView({zoom, location}){
     this.map.setView([location.latitude, location.longitude], zoom)

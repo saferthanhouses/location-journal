@@ -1,7 +1,7 @@
 // redux like - lite store?
 // state container that uses event emitters
 
-import { sortLocations, filterLocations } from '../utils/'
+import { sortLocations, filterLocations, getTimestamp } from '../utils/'
 import { getCurrentPosition, 
           extractLatLng,
           extractLatLngAndTime } from '../services/locations'
@@ -73,8 +73,10 @@ state.update = function(event, payload){
       return loadLocations(payload)
     case "change_mode":
       return changeMode(payload)
+    case "request_open_location_modal":
+      return requestOpenLocationModal()
     case "open_location_modal":
-      return openLocationModal()
+      return openLocationModal(payload)
     case "close_location_modal":
       return closeLocationModal()
     case "start_save_location":
@@ -97,7 +99,31 @@ state.update = function(event, payload){
       return sortChange(payload)
     case "filter_locations":
       return filterLocs(payload)
+    case "open_delete_location":
+      return openDelete(payload)
+    case "delete_location":
+      return deleteLocation()
+    case "location_deleted":
+      return locationDeleted()
   }
+}
+
+function locationDeleted(){
+  state.locations.splice(state.selectedLocation, 1)
+  state.all_locations = state.locations.slice()
+  state.emit('build_locations')
+  state.emit('location_removed')
+  state.selectedLocation = null
+}
+
+function deleteLocation(){
+  state.emit('delete_location')
+}
+
+function openDelete({idx}){
+  state.selectedLocation = idx
+  state.emit('close_drawer')
+  state.emit('open_delete_location')
 }
 
 function filterLocs({filter}){
@@ -143,7 +169,7 @@ function openAccountDrawer(){
 function locationSaved({location}){
   state.locations.push(location)
   state.all_locations.push(location)
-  state.locations = sortLocations( state.locations, state.sortTerm )
+  // state.locations = sortLocations( state.locations, state.sortTerm )
   state.emit('add_location', { location })
   state.emit('build_locations')
   closeLocationModal()
@@ -162,20 +188,35 @@ function saveLocation({ data }){
   state.emit('save_location', {location: locationObj})
 }
 
-function openLocationModal(){
+function requestOpenLocationModal(){
+  state.emit('request_open_location_modal')
+}
+
+function openLocationModal(locationObj){
   if (state.locationModal.isOpen || state.locationModal.isOpening ) return
   state.emit('close_drawer')
   state.locationModal.isOpening = true;
-  getCurrentPosition()
-    .then( extractLatLngAndTime )
+  let locationPromise
+  // locaiton obj only passed in when map triggered in exploration mode
+  if (locationObj){
+    let timestamp = getTimestamp()
+    let location = locationObj.location 
+    locationPromise = Promise.resolve({location, timestamp})
+  } else {
+    locationPromise = getCurrentPosition().then( extractLatLngAndTime )
+    // only update the location if this is user mode
+    // state.currentLocation = location
+  }
+  locationPromise
     .then( ({location, timestamp }) => {
-      state.currentLocation = location
+      if (state.userMode) state.currentLocation = location
+      console.log("location", location, "timestamp", timestamp);
       state.locationModal.location = location
       state.locationModal.timestamp = timestamp
       state.locationModal.isOpening = false;
       state.locationModal.isOpen = true;
       state.emit('open_location_modal')
-    })
+    })  
 }
 
 function closeLocationModal(){
@@ -188,7 +229,7 @@ function closeLocationModal(){
 
 function loadLocations(payload){
   console.log("listeners", listeners["add_location"])
-  state.all_locations = payload.locations
+  state.all_locations = payload.locations.slice()
   state.locations = sortLocations( payload.locations, state.sortTerm )
   state.locations.forEach( location => {
     state.emit('add_location', { location })

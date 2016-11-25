@@ -470,6 +470,27 @@ div#modal-header {
   justify-content: flex-start;
 }
 
+#location-coords-container {
+  margin: 10px 20px;
+  color: #212121;
+  z-index: 20;
+  position: relative;
+  width: 91%;
+  left: -3px;
+}
+
+#location-coord-container input {
+  /*color: #212121;*/
+}
+
+#location-coords-input {
+  cursor: auto;
+  background-color: transparent;
+  opacity: 0.8;
+  font-style: italic;
+  font-size: 14px;
+}
+
 #modal-location-name-container {
   margin: 10px 20px;
   color: #212121;
@@ -578,6 +599,17 @@ div#icon-selector {
 
 #modal-location-tags-title {
   font-style: italic;
+}
+
+#crosshairs-container {
+  position: fixed;
+  z-index:19;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events:none;
 }
 
 @media (max-width: 420px){

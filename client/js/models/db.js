@@ -15,11 +15,13 @@ class LocationsModel {
   constructor(initialState){
     this.state = initialState
     this.saveLocation = this.saveLocation.bind(this)
+    this.deleteLocation = this.deleteLocation.bind(this)
     this.startStateListeners()
     this.loadLocations()
   }
   startStateListeners(){
     state.subscribe('save_location', this.saveLocation)
+    state.subscribe('delete_location', this.deleteLocation)
   }
   loadLocations(){
     return db.allDocs({
@@ -41,6 +43,16 @@ class LocationsModel {
       .catch( err => {
         console.error(err)
         state.update('create_location_error', err)
+      })
+  }
+  deleteLocation(){
+     db.remove(this.state.locations[this.state.selectedLocation])
+      .then( result => {
+        state.update('location_deleted')
+      })
+      .catch( err => {
+        console.error(err)
+        state.update('delete_location_error', err)
       })
   }
 }

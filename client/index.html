@@ -47,6 +47,9 @@
       <div id="modal-header-save" class="modal-header-item">SAVE</div>
     </div>
     <div id="modal-content">
+      <div id="location-coords-container" class="mui-textfield">
+        <input type="text" disabled="true" id="location-coords-input">
+      </div>
       <div class="mui-textfield mui-textfield--float-label" id="modal-location-name-container">
         <input type="text" id="modal-location-name-input">
         <label>Where?</label>
@@ -141,6 +144,12 @@
       <input type="text" placeholder="find places" name="place-search" id="place-search-input">
     </div>
   </form>
+  <div id="crosshairs-container">
+    <svg fill="#000000" height="36" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+      <path d="M0 0h24v24H0z" fill="none"/>
+    </svg>
+  </div>
   <div id="leaflet-map-container"></div>
   <div class="container">
     <div id="bottom-menu">

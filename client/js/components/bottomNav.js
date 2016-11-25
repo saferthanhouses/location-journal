@@ -23,7 +23,7 @@ class BottomNav {
   }
   openModalClickHandler(evt){
     evt.stopPropagation()
-    state.update('open_location_modal')
+    state.update('request_open_location_modal')
   }
   openLocationsClickHandler(evt){
     evt.stopPropagation()
