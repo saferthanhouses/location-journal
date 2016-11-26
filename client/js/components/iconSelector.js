@@ -1,5 +1,6 @@
 // import LocationIcon from '../LocationIcon/'
 import { icons } from '../services/icons'
+import state from '../store/state'
 import { $ } from '../utils/'
 
 class IconSelector {
@@ -10,8 +11,15 @@ class IconSelector {
     this.style = {}
     this.toggleIcon = this.toggleIcon.bind(this)
     this.createIconButton = this.createIconButton.bind(this)
+    this.expand = this.expand.bind(this)
+    this.collapse = this.collapse.bind(this)
     this.renderIcons()
     this.selectedIcon = null;
+    this.addStateListeners()
+  }
+  addStateListeners(){
+    state.subscribe('icon_selector_close', this.collapse)
+    state.subscribe('icon_selector_expand', this.expand)
   }
   getSelectedIcon(){
     return this.selectedIcon.dataset.icon

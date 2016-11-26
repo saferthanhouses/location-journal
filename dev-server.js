@@ -60,7 +60,8 @@ function buildStaticAssets(){
   console.log(chalk.green("building static assets"));
   var promises = [
     ncp('./client/assets', './build/assets'),
-    cp('./client/favicon.ico', './build/favicon.ico')
+    cp('./client/favicon.ico', './build/favicon.ico'),
+    // ncp('./bower_components/', './build/bower_components')
   ]
   return Promise.all(promises)
 }

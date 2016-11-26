@@ -1,4 +1,5 @@
 import { $ } from '../utils/'
+import state from '../store/state'
 
 class TagsContainer {
   constructor(){
@@ -22,16 +23,10 @@ class TagsContainer {
     this.tagsFormElt.addEventListener('submit', this.tagsFormSubmitListener)
   }
   tagsInputFocusListener(){
-    console.log("this",this)
-    iconSelector.style.height = 0;
-    iconSelector.style.padding = "0px";
-    iconSelector.style.opacity = "0";
+    state.emit('icon_selector_close')
   }
   tagsInputBlurListener(){
-    // this.EE.emit('icon-selector', 'expand')
-    // iconSelector.style.height = iconSelectorStyles.height;
-    // iconSelector.style.padding = iconSelectorStyles.padding;
-    // iconSelector.style.opacity = iconSelectorStyles.opacity;
+    state.emit('icon_selector_expand')
   }
   tagsFormSubmitListener(evt){
     evt.preventDefault();
@@ -52,7 +47,7 @@ class TagsContainer {
   }
   resetTags(){
     this.tagsContainerElt.innerHTML = ""
-    this.currentTags = []
+    this.state.currentTags = []
   }
 }
 

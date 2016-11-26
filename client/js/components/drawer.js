@@ -24,6 +24,7 @@ class Drawer {
     this.$locationsListContainer = $('div#locations-list-container')
     this.$sortLocations = $("#sort-locations-select")
     this.$tagSearch = $("#tag-search-input")
+    this.$loginButton = $('#login-button')
     // bind methods
     this.buildLocations = this.buildLocations.bind(this)
     this.renderLocations = this.renderLocations.bind(this)
@@ -56,6 +57,10 @@ class Drawer {
   addEventListeners(){
     this.$sortLocations.addEventListener('change', this.sort)
     this.$tagSearch.addEventListener('input', this.filter)
+    this.$loginButton.addEventListener('click', this.startLogin)
+  }
+  startLogin(){
+    state.update('start_login')
   }
   filter(evt){
     state.update('filter_locations', {filter: evt.target.value})
@@ -76,7 +81,6 @@ class Drawer {
     ])
   }
   renderLocation(location, idx){
-    // console.log("location",location);
     let { icon, name, description, latitude, longitude, timestamp, tags } = location
     if (!tags){
       tags = ["to visit", "shop", "sex"];
@@ -132,9 +136,7 @@ class Drawer {
     state.subscribe('close_drawer_to_change', this.closeDrawerToChange)
   }
   closeDrawer(){
-    console.log("close drawer");
     if (!this.state.drawer.isOpen) return
-    console.log("closing drawer");
     this.$drawer.classList.toggle('drawer-closed')
     state.update('drawer_closed')
   }
@@ -148,7 +150,6 @@ class Drawer {
     }
   }
   openLocationsDrawer(){
-    console.log("openLocationsDrawer");
     this.showLocationsDrawer()
     this.$drawer.classList.toggle('drawer-closed')
     state.update('drawer_open', {view: "locations"})

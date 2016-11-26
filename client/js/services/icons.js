@@ -13,5 +13,6 @@ export const icons = [
 'clippy.gif',
 'churchill.png',
 'shark-dance.gif',
-'pirate-ship.png'
+'pirate-ship.png',
+'takeoff.svg'
 ]

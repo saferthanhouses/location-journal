@@ -105,7 +105,45 @@ state.update = function(event, payload){
       return deleteLocation()
     case "location_deleted":
       return locationDeleted()
+    case "start_login":
+      return startLogin()
+    case "login":
+      return login(payload)
+    case "updating_location":
+      return updateLocation()
+    case "location_updated":
+      return locationUpdated()
+    case "icon_selector_close":
+      return iconSelectorClose()
+    case "icon_selector_expand":
+      return iconSelectorExpand()
   }
+}
+
+function iconSelectorExpand(){
+  state.emit('icon_selector_close')
+}
+
+function iconSelectorClose(){
+  state.emit('icon_selector_close')
+}
+
+function updateLocation(){
+  state.emit('toast_open', {message: "One second while we get your location"})
+}
+
+function locationUpdated(){
+  state.emit('toast_close')
+}
+
+function login({user}){
+  state.user = user
+  state.isLoggedIn = true
+  state.emit('login')
+}
+
+function startLogin(){
+  state.emit('start_login')
 }
 
 function locationDeleted(){
@@ -164,12 +202,13 @@ function openLocationsDrawer(){
 }
 
 function requestOpenAccountDrawer(){
+  if (state.drawer.isOpening) return
   if (state.drawer.isOpen && state.drawer.view === 'account') return
   else if (!state.drawer.isOpen){
-    console.log("!state.drawer.isOpen");
+    state.drawer.isOpening = true;
     state.emit('open_account_drawer')
   } else if (state.drawer.isOpen && state.drawer.view === "locations"){
-    console.log("locations opens");
+    // state.drawer.isOpening = true;
     state.emit('close_drawer_to_change', {view: 'account'})
   }
   // state.emit('request_open_account_drawer')
@@ -229,7 +268,6 @@ function openLocationModal(locationObj){
 }
 
 function closeLocationModal(){
-  console.log("closeLocationModal");
   state.locationModal.currentLocation = null;
   state.locationModal.timestamp = null;
   state.locationModal.isOpen = false;
@@ -237,7 +275,6 @@ function closeLocationModal(){
 }
 
 function loadLocations(payload){
-  console.log("listeners", listeners["add_location"])
   state.all_locations = payload.locations.slice()
   state.locations = sortLocations( payload.locations, state.sortTerm )
   state.locations.forEach( location => {

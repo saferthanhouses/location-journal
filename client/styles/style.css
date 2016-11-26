@@ -67,7 +67,7 @@ div#drawer {
 
 #login-button p {
   margin: 0;
-  font-size: 16px;
+  font-size: 15px;
 }
 
 #locations-list-container {
@@ -616,6 +616,33 @@ div#icon-selector {
   justify-content: center;
   align-items: center;
   pointer-events:none;
+}
+
+#toast {
+  background-color: #455a64;
+  color: white;
+  position: fixed;
+  z-index: 100;
+  min-height: 40px;
+  width: 80%;
+  border-radius: 20px;
+  left: 10%;
+  top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 13px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+#toast p {
+  margin: 0;
+}
+
+#toast.toast-open {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 @media (max-width: 420px){

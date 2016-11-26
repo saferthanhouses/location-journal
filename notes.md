@@ -29,16 +29,21 @@ v.0.1
 Issues
 
 Bugs
+- all places given the same tags
+- add default icon / disable button without icon
 - if map in user mode and user has clicked on a item in the drawer the map will be in the wrong place < --- when a user clicks on a drawer item the map should go to exploration mode
+- double click on account button bug (seemms to switch the functionality of clicking the window and clicking the account button)
 
 UI Functionality
 - more emojis / icons <--- ask nick
+- different kinds (serious, funny, gif, silly)
 - some sort of ripple effect from target crosshairs on modal opening
 - add error messaging for db / geolocation
+- move description back into location input
 - change tags to look more taggy
 - change map maybe?
-- adding emojis
 - google analytics
+- change size of emojis at different zoom levels
 
 Offline functionality
 - service worker based on versioning
@@ -46,6 +51,7 @@ Offline functionality
 
 Geolocation Functionality
 - show toast for 'get user location', 'outdated location please update' etc
+- this can take a while on mobile, so is necessary
 
 Development Functionality
 - do something about geolocation indecision (!!!)

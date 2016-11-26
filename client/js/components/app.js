@@ -6,8 +6,10 @@ import AppWindow from './window'
 import Drawer from './drawer'
 // import IconSelector from './iconSelector'
 import Icons from './icons'
+import Toast from './toast'
 import DB from '../models/db'
 import DeleteModal from './deleteModal'
+import FirebaseModel from '../models/firebase'
 
 class App {
   constructor(state){
@@ -16,9 +18,11 @@ class App {
     this.setupDB()
   }
   setupDB(){
+    this.fb = new FirebaseModel(this.state)
     this.db = new DB(this.state)
   }
   init(){
+    this.toast = new Toast()
     this.appWindow = new AppWindow()
     this.map = new LocationMap(this.state, '#leaflet-map-container')
     this.icons = new Icons(this.state)
